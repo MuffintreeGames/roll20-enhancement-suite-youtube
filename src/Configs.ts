@@ -42,6 +42,7 @@ import TokenFromImg from "./modules/TokenFromImg/Config";
 import DisablePlayerDrawings from "./modules/DisablePlayerDrawings/Config";
 import SetTableEntryAvatarByUrl from "./modules/SetTableEntryAvatarByUrl/Config";
 import LibreAudio from "./modules/LibreAudio/Config";
+import YoutubeBox from "./modules/YoutubeBox/Config";
 import TokenBarPositionAdjust from "./modules/TokenBarPositionAdjust/Config"
 import PerformanceImprovements from "./modules/PerformanceImprovements/Config"
 import ChromeUpdateChecker from "./modules/ChromeUpdateChecker/Config"
@@ -60,6 +61,7 @@ const addCfg = (cfg: VTTES.Module_Config) => VTTES_MODULE_CONFIGS[cfg.id] = cfg;
 addCfg(DisablePlayerDrawings);
 addCfg(TokenBarPositionAdjust);
 addCfg(LibreAudio);
+addCfg(YoutubeBox);
 addCfg(TokenFromImg);
 addCfg(AdjustableOpacity);
 addCfg(RememberTextToolSettings);

@@ -27,8 +27,33 @@ interface InternalRequestData {
     is_valid: boolean,
 };
 
+class YoutubeBoxSong {
+    id: string;
+    title: string
+    track_id: string;
+    volume: number;
+    url: string;
+
+    constructor(title, volume, url) {
+        this.id = "temp";
+        this.title = title;
+        this.track_id = "temp";
+        this.volume = volume;
+        this.url = url;
+    }
+}
+
+const LOCALSTORAGE_SONG_DATA_KEY = "vttes_userscript_songs";
+
+var youtubeBox_songList;
+
 const check_if_url_is_youtube = (url: string, request_id: number, ok_callback: (request_id: number) => void, err_callback: (request_id: number) => void) => {
-    const testElement = document.createElement("audio") as any;
+    if (!url.startsWith("https://www.youtube.com/watch")) {
+        err_callback(request_id);
+        return;
+    }
+    ok_callback(request_id);
+    /*const testElement = document.createElement("audio") as any;
     testElement.crossorigin = "anonymous";
     testElement.volume = 0;
 
@@ -56,8 +81,15 @@ const check_if_url_is_youtube = (url: string, request_id: number, ok_callback: (
     testElement.addEventListener("canplay", onCanPlay);
 
     testElement.src =  url;
-    testElement.play();
+    testElement.play();*/
 };
+
+/*async function fetch_youtubeInfo(url) {
+	const resp = await fetch(url);
+
+	const jsonResp = await resp.json();
+    console.log("youtube response: " + jsonResp);
+}*/
 
 export default class YoutubeBoxDialogWidget extends DialogBase<YoutubeBoxCreateRequest[]> {
 
@@ -77,6 +109,21 @@ export default class YoutubeBoxDialogWidget extends DialogBase<YoutubeBoxCreateR
     //playlist_id_new_playlist = "__r20es_new";
 
     public show() {
+        let song_data = window.localStorage.getItem(LOCALSTORAGE_SONG_DATA_KEY);
+
+        if (song_data) {
+          try {
+            console.log("loaded saved songs");
+            youtubeBox_songList = JSON.parse(song_data);
+          }
+          catch(e) {
+            console.error("Failed to parse vttes youtube song data", song_data, e);
+            youtubeBox_songList = {};
+          }
+        } else {
+          console.log("no saved songs");
+            youtubeBox_songList = {};
+          }
         this.requests = {};
         this.ui_request_elements = {};
         this.internal_request_data = {};
@@ -123,12 +170,6 @@ export default class YoutubeBoxDialogWidget extends DialogBase<YoutubeBoxCreateR
 
     private ui_on_update_title_input = (e) => {
         const id = this.ui_get_corresponding_track_id_by_event(e);
-
-        {
-            const intern = this.internal_request_data[id];
-            intern.can_auto_resolve_title = false;
-        }
-
         {
             const req = this.requests[id];
             req.title = e.target.value;
@@ -160,8 +201,9 @@ export default class YoutubeBoxDialogWidget extends DialogBase<YoutubeBoxCreateR
         }
     };
 
-    private misc_on_audio_stream_checker_ok = (request_id: number) => {
+    private misc_on_url_checker_ok = (request_id: number) => {
         {
+            console.log("calling OK function");
             const intern = this.internal_request_data[request_id];
             intern.is_valid = true;
         }
@@ -174,8 +216,8 @@ export default class YoutubeBoxDialogWidget extends DialogBase<YoutubeBoxCreateR
         this.ui_disable_ok_button_if_there_is_an_invalid_url_or_enable_it_if_there_are_none ();
     };
 
-    private misc_on_audio_stream_checker_err = (request_id: number) => {
-
+    private misc_on_url_checker_err = (request_id: number) => {
+        console.log("calling error function");
         {
             const intern = this.internal_request_data[request_id];
             intern.is_valid = false;
@@ -196,23 +238,17 @@ export default class YoutubeBoxDialogWidget extends DialogBase<YoutubeBoxCreateR
 
         const url = e.target.value;
 
-        {
-            const intern = this.internal_request_data[id];
-
-            if (intern.can_auto_resolve_title) {
-                const title = nearly_format_file_url(url);
-
-                elements.title.value = title;
-                req.title = title;
-            }
-        }
-
         req.url= url;
 
         elements.status.innerText = "Checking...";
         DOM.apply_style(elements.status, CommonStyle.progress_span);
 
-        check_if_url_is_youtube(url, id, this.misc_on_audio_stream_checker_ok, this.misc_on_audio_stream_checker_err);
+        check_if_url_is_youtube(url, id, this.misc_on_url_checker_ok, this.misc_on_url_checker_err);
+
+        const intern = this.internal_request_data[id];
+        /*if (intern.is_valid) {
+            fetch_youtubeInfo(url);
+        }*/
     };
 
     private ui_set_volume_status = (current_volume: HTMLElement, vol: number) => {

@@ -246,6 +246,8 @@ namespace Roll20 {
     vttes_default_camera_y: number;
     vttes_default_camera_zoom: number;
 
+    currentlyPlayingSong: string;
+
       adv_fow_dim_reveals: boolean
       adv_fow_enabled: boolean
       adv_fow_grid_size: number
