@@ -85,6 +85,7 @@ class YoutubeBox extends R20Module.OnAppLoadBase {
             this.ifrm = document.createElement("IFRAME");
             this.ifrm.setAttribute("src",currentSong);
             this.ifrm.setAttribute("id","youtubeFrame");
+            this.ifrm.setAttribute("allow","autoplay");
             this.ifrm.style.width="500px";
             this.ifrm.style.height="200px";
            jukebox.appendChild(this.ifrm);
